@@ -146,7 +146,7 @@ if __name__ == "__main__":
     First we start with calculating the different paths between the start and end.
     """
 
-    paths = KnightsMoves().find_paths(board=b, start=(0,0), end=(6, 6))
+    paths = KnightsMoves().find_paths(board=b, start=(0,0), end=(5, 5))
 
     print(paths)
 
