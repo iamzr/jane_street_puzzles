@@ -32,8 +32,8 @@ def score_path(a: int, b: int, c: int, path: list[tuple[int, int]]) -> int:
     board = get_board(a, b, c)
     board_flipped = flip_board(board)
 
-    score = a
-    score_flipped = a
+    score = 0
+    score_flipped = 0
     old_move = [0, 0]
     for new_move in path[1:]:
 
@@ -59,3 +59,9 @@ def score_path(a: int, b: int, c: int, path: list[tuple[int, int]]) -> int:
     if (score == 2024) and (score_flipped == 2024):
         print(f"Path: {path}")
         print(f"a: {a}, b: {b}, c: {c}")
+
+
+# %%
+a, b, c, = 1, 2, 3
+for path in paths:
+    score_path(a, b, c, path)
