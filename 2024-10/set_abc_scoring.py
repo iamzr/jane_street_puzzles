@@ -30,11 +30,25 @@ def flip_board(board: list[list[str]]) -> list[list[str]]:
 
 def score_path(a: int, b: int, c: int, path: list[tuple[int, int]]) -> int:
     board = get_board(a, b, c)
+    board_flipped = flip_board(board)
 
     score = a
+    score_flipped = a
     old_move = [0, 0]
     for new_move in path[1:]:
         if board[old_move[0]][old_move[1]] == board[new_move[0]][new_move[1]]:
             score += board[new_move[0]][new_move[1]]
         else:
             score *= board[new_move[0]][new_move[1]]
+
+        if board_flipped[old_move[0]][old_move[1]] == board_flipped[new_move[0]][new_move[1]]:
+            score_flipped += board_flipped[new_move[0]][new_move[1]]
+        else:
+            score_flipped *= board_flipped[new_move[0]][new_move[1]]
+
+        if (score > 2024) or (score_flipped > 2024):
+            break
+
+    if (score == 2024) and (score_flipped == 2024):
+        print(f"Path: {path}")
+        print(f"a: {a}, b: {b}, c: {c}")
