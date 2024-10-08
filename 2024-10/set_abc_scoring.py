@@ -59,9 +59,6 @@ def score_path(a: int, b: int, c: int, path: list[tuple[int, int]]) -> int:
 
     # check if score is corect at the end of the path
     if (score == 2024) and (score_flipped == 2024):
-        print(score, score_flipped)
-        print(f"Path: {path}")
-        print(f"a: {a}, b: {b}, c: {c}")
         return path
 
 
@@ -82,5 +79,4 @@ for a in range(1, 50):
                         min_abc = (a, b, c)
                         min_path = path
                         min_sum = a + b + c
-
-print(min_abc, min_path, min_sum)
+                        print(min_abc, min_path, min_sum)
