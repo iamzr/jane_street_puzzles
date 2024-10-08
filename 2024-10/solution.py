@@ -6,17 +6,18 @@ from sympy import Eq, symbols
 logger = logging.getLogger(__name__)
 
 b = [
-    ["A", "B" , "B", "C", "C", "C"],
-    ["A", "B" , "B", "C", "C", "C"],
-    ["A", "A" , "B", "B", "C", "C"],
-    ["A", "A" , "B", "B", "C", "C"],
-    ["A", "A" , "A", "B", "B", "C"],
-    ["A", "A" , "A", "B", "B", "C"],
+    ["A", "B", "B", "C", "C", "C"],
+    ["A", "B", "B", "C", "C", "C"],
+    ["A", "A", "B", "B", "C", "C"],
+    ["A", "A", "B", "B", "C", "C"],
+    ["A", "A", "A", "B", "B", "C"],
+    ["A", "A", "A", "B", "B", "C"],
 ]
 
 """
 Also need to keep track of if it's visited or not, and if it's visited then to stop because we cant revisit a square
 """
+
 
 class KnightsMoves:
 
@@ -39,17 +40,16 @@ class KnightsMoves:
         y = curr[1]
 
         possible_moves = [(x - 2, y - 1),
-        (x - 2, y + 1),
-        (x + 2, y - 1),
-        (x + 2, y + 1),
-        (x - 1, y - 2),
-        (x - 1, y + 1),
-        (x + 1, y - 2),
-        (x + 1, y + 2)]
+                          (x - 2, y + 1),
+                          (x + 2, y - 1),
+                          (x + 2, y + 1),
+                          (x - 1, y - 2),
+                          (x - 1, y + 1),
+                          (x + 1, y - 2),
+                          (x + 1, y + 2)]
 
-        
-        result = [ point for point in possible_moves if point[0] >= 0 and point[0] < 7 and point[1] >= 0 and point[1] < 7
-                  ] 
+        result = [point for point in possible_moves if point[0] >= 0 and point[0] < 7 and point[1] >= 0 and point[1] < 7
+                  ]
 
         return result
 
@@ -59,7 +59,7 @@ class KnightsMoves:
         """
         q: collections.deque[tuple[int, int]] = collections.deque()
 
-        visited = np.zeros((len(board), len(board))) 
+        visited = np.zeros((len(board), len(board)))
 
         logger.debug(f"Visited {start}")
         visited[start[0]][start[1]] = True
@@ -71,14 +71,14 @@ class KnightsMoves:
             path = q.popleft()
 
             if len(path) > max_len:
-                return(paths)
+                return (paths)
 
             curr = path[-1]
 
             if curr == end:
                 logger.info("Reached the end.")
                 paths.append(path)
-            
+
             possible_moves = self.possible_moves(curr)
 
             logger.debug(f"""Possible moves from {curr}:
@@ -88,7 +88,6 @@ class KnightsMoves:
 
                 logger.debug(f"curr path: {path}")
                 visited = next in path
-
 
                 logger.debug(f"Consider {next}, visited: {visited}")
                 if not visited:
@@ -118,35 +117,30 @@ class KnightsMoves:
         a, b, c = symbols("a b c")
 
         score = Eq(a)
-        
+
         for next in path:
             next_letter = b[curr[0]][curr[1]]
-            
+
             m = {
-                "A" : a,
-                "B" : b,
+                "A": a,
+                "B": b,
                 "C": c
             }
-            
-            next_letter = m[next_letter]
-            
-            
-            
-            
 
-            
+            next_letter = m[next_letter]
+
     def flip_path(self, path: list[tuple[int, int]]) -> list[tuple[int, int]]:
-        return [(x, 6 - y) for x, y in path]       
-        
+        return [(x, 6 - y) for x, y in path]
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename=f'example.log', encoding='utf-8', level=logging.DEBUG)
+    logging.basicConfig(filename=f'example.log',
+                        encoding='utf-8', level=logging.DEBUG)
     """
     First we start with calculating the different paths between the start and end.
     """
 
-    paths = KnightsMoves().find_paths(board=b, start=(0,0), end=(5, 5))
+    paths = KnightsMoves().find_paths(board=b, start=(0, 0), end=(5, 5))
 
     print(paths)
 
@@ -168,6 +162,3 @@ if __name__ == "__main__":
     path_1 = 2024
     path 2 = 2024
     """
-
-
-
