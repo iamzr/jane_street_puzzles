@@ -34,7 +34,7 @@ class KnightsMoves:
         b[x + 1][y - 2]
         b[x + 1][y + 2]
 
-        assuming that the new indices i, j satisfy 0 < i, j < 7
+        assuming that the new indices i, j satisfy 0 < i, j < 6
         """
         x = curr[0]
         y = curr[1]
@@ -48,7 +48,7 @@ class KnightsMoves:
                           (x + 1, y - 2),
                           (x + 1, y + 2)]
 
-        result = [point for point in possible_moves if point[0] >= 0 and point[0] < 7 and point[1] >= 0 and point[1] < 7
+        result = [point for point in possible_moves if point[0] >= 0 and point[0] < 6 and point[1] >= 0 and point[1] < 6
                   ]
 
         return result
