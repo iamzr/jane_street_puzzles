@@ -5,7 +5,7 @@ from sympy import Eq, symbols
 
 logger = logging.getLogger(__name__)
 
-b = [
+board = [
     ["A", "B" , "B", "C", "C", "C"],
     ["A", "B" , "B", "C", "C", "C"],
     ["A", "A" , "B", "B", "C", "C"],
@@ -14,9 +14,6 @@ b = [
     ["A", "A" , "A", "B", "B", "C"],
 ]
 
-"""
-Also need to keep track of if it's visited or not, and if it's visited then to stop because we cant revisit a square
-"""
 
 class KnightsMoves:
 
@@ -91,6 +88,7 @@ class KnightsMoves:
 
 
                 logger.debug(f"Consider {next}, visited: {visited}")
+
                 if not visited:
 
                     logger.debug(f"{next} not visited")
@@ -117,21 +115,29 @@ class KnightsMoves:
 
         a, b, c = symbols("a b c")
 
-        score = Eq(a)
+        score = a
         
+        m = {
+            "A" : a,
+            "B" : b,
+            "C": c
+        }
+        
+        current_letter = "A"
         for next in path:
-            next_letter = b[curr[0]][curr[1]]
-            
-            m = {
-                "A" : a,
-                "B" : b,
-                "C": c
-            }
-            
-            next_letter = m[next_letter]
-            
-            
-            
+            next_letter = board[next[0]][next[1]]
+
+            logger.debug(f"{curr} {current_letter} -> {next} {m[next_letter]}")
+            if next_letter != current_letter:
+                logger.debug(f"multiply by {m[next_letter]}")
+                score = score * m[next_letter]
+            else:
+                logger.debug(f"add {m[next_letter]}")
+                score = score + m[next_letter]
+
+            current_letter = next_letter
+        
+        print(score)
             
 
             
@@ -141,19 +147,28 @@ class KnightsMoves:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename=f'example.log', encoding='utf-8', level=logging.DEBUG)
+    # logging.basicConfig(level=logging.DEBUG)
     """
     First we start with calculating the different paths between the start and end.
     """
 
-    paths = KnightsMoves().find_paths(board=b, start=(0,0), end=(6, 6))
+    paths = KnightsMoves().find_paths(board=board, start=(0,0), end=(6, 6))
+    
+    with open("paths.txt", "w") as f:
+        for path in paths:
+            f.writelines(f"{path}\n")
 
-    print(paths)
 
     """
     We need to also find the paths from (0,6) to (6,0), but the thing is all of our solutions are valid from any corner to the corner across.
-    So all we need to do is rotate each path and then we have a valid solution for (0,6) and (6,0)
+    So all we need to do is rotate (or just reflect in y = 3) each path and then we have a valid solution for (0,6) and (6,0)
     """
+    alt_paths = [(KnightsMoves().flip_path(path)) for path in paths]
+
+    with open("alt_paths.txt", "w") as f:
+        for path in alt_paths:
+            f.writelines(f"{path}\n")
+
 
     """
     Need to calculate the formulas for the scores
