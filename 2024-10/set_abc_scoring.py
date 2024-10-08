@@ -62,10 +62,13 @@ def score_path(a: int, b: int, c: int, path: list[tuple[int, int]]) -> int:
         print(score, score_flipped)
         print(f"Path: {path}")
         print(f"a: {a}, b: {b}, c: {c}")
-        return
+        return path
 
 
 # %%
+min_sum = 150
+min_abc = None
+min_path = None
 for a in range(1, 50):
     for b in range(1, 50):
         if a == b:
@@ -74,4 +77,10 @@ for a in range(1, 50):
             if c == a or c == b:
                 continue
             for path in paths:
-                score_path(a, b, c, path)
+                if score_path(a, b, c, path):
+                    if min_sum > a + b + c:
+                        min_abc = (a, b, c)
+                        min_path = path
+                        min_sum = a + b + c
+
+print(min_abc, min_path, min_sum)
