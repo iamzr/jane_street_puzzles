@@ -1,7 +1,8 @@
 import collections
 import logging
 import numpy as np
-from sympy import Eq, symbols
+from sympy import Eq, lambdify, symbols
+from scipy.optimize import NonlinearConstraint, minimize
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,10 @@ board = [
 
 
 class KnightsMoves:
+    def __init__(self, b):
+        self.b = b
+        
+        self.n = len(b)
 
     def possible_moves(self, curr: tuple[int, int]) -> list[tuple[int, int]]:
         """
@@ -26,43 +31,42 @@ class KnightsMoves:
         b[x + 2][y - 1]
         b[x + 2][y + 1]
         b[x - 1][y - 2]
-        b[x - 1][y + 1]
+        b[x - 1][y + 2]
         b[x + 1][y - 2]
         b[x + 1][y + 2]
 
-        assuming that the new indices i, j satisfy 0 < i, j < 7
+        assuming that the new indices i, j satisfy 0 < i, j < n
         """
-        x = curr[0]
-        y = curr[1]
+        x, y = curr
 
         possible_moves = [(x - 2, y - 1),
         (x - 2, y + 1),
         (x + 2, y - 1),
         (x + 2, y + 1),
         (x - 1, y - 2),
-        (x - 1, y + 1),
+        (x - 1, y + 2),
         (x + 1, y - 2),
         (x + 1, y + 2)]
 
         
-        result = [ point for point in possible_moves if point[0] >= 0 and point[0] < 7 and point[1] >= 0 and point[1] < 7
+        result = [ point for point in possible_moves if point[0] >= 0 and point[0] <= self.n and point[1] >= 0 and point[1] <= self.n
                   ] 
 
         return result
 
-    def find_paths(self, board: list[list[str]], start: tuple[int, int], end: tuple[int, int], max_len: int = 8):
+    def find_paths(self, start: tuple[int, int], end: tuple[int, int], max_len: int = 8):
         """
         Finds all possible paths between start and end using only knights moves.
         """
-        q: collections.deque[tuple[int, int]] = collections.deque()
+        q: collections.deque[list[tuple[int, int]]] = collections.deque()
 
-        visited = np.zeros((len(board), len(board))) 
+        visited = np.zeros((self.n, self.n)) 
 
         logger.debug(f"Visited {start}")
         visited[start[0]][start[1]] = True
         q.append([start])
 
-        paths = []
+        paths: list[list[tuple[int, int]]] = []
         while q:
             logger.debug("start iteration")
             path = q.popleft()
@@ -130,20 +134,62 @@ class KnightsMoves:
             logger.debug(f"{curr} {current_letter} -> {next} {m[next_letter]}")
             if next_letter != current_letter:
                 logger.debug(f"multiply by {m[next_letter]}")
-                score = score * m[next_letter]
+                score *= m[next_letter]
             else:
                 logger.debug(f"add {m[next_letter]}")
-                score = score + m[next_letter]
+                score += m[next_letter]
 
             current_letter = next_letter
         
+
         print(score)
+        return lambdify([a,b,c], score)
             
 
             
     def flip_path(self, path: list[tuple[int, int]]) -> list[tuple[int, int]]:
-        return [(x, 6 - y) for x, y in path]       
+        return [(x, self.n - y) for x, y in path]       
         
+
+def run_optimization(f, g):
+    """Once we've got a set of paths, then we've essentially got an optimization problem. 
+    
+    Minimize: A + B + C 
+    given:
+    
+    A, B, C > 0 
+    path_1 = 2024
+    path 2 = 2024
+    """
+    def constraint_1(x):
+        a, b, c = x
+        return f(a,b,c) - 2024
+
+    def constraint_2(x):
+        a, b, c = x
+        return g(a,b,c) - 2024
+
+    c1 = NonlinearConstraint(constraint_1, 0, 0)
+    c2 = NonlinearConstraint(constraint_2, 0, 0)
+
+    def objective_function(x):
+        a, b, c = x
+        return  a + b + c
+
+    x = [1,1,1]
+
+    bounds = (
+        (0, None),
+        (0, None),
+        (0, None)
+    )
+
+    res = minimize(objective_function,
+                   x, 
+                   constraints=[c1, c2],
+                   bounds=bounds)
+    
+    return res
 
 
 if __name__ == "__main__":
@@ -151,8 +197,11 @@ if __name__ == "__main__":
     """
     First we start with calculating the different paths between the start and end.
     """
+    n=6
 
-    paths = KnightsMoves().find_paths(board=board, start=(0,0), end=(6, 6))
+    k =KnightsMoves(b=board)
+
+    paths = k.find_paths(start=(0,0), end=(6, 6))
     
     with open("paths.txt", "w") as f:
         for path in paths:
@@ -163,7 +212,7 @@ if __name__ == "__main__":
     We need to also find the paths from (0,6) to (6,0), but the thing is all of our solutions are valid from any corner to the corner across.
     So all we need to do is rotate (or just reflect in y = 3) each path and then we have a valid solution for (0,6) and (6,0)
     """
-    alt_paths = [(KnightsMoves().flip_path(path)) for path in paths]
+    alt_paths = [(k.flip_path(path)) for path in paths]
 
     with open("alt_paths.txt", "w") as f:
         for path in alt_paths:
@@ -172,16 +221,6 @@ if __name__ == "__main__":
 
     """
     Need to calculate the formulas for the scores
-    """
-
-    """Once we've got a set of paths, then we've essentially got an optimization problem. 
-
-    Minimize: A + B + C 
-    given:
-
-    A, B, C > 0 
-    path_1 = 2024
-    path 2 = 2024
     """
 
 
