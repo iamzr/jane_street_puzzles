@@ -3,6 +3,7 @@ import logging
 import numpy as np
 from sympy import Eq, lambdify, symbols
 from scipy.optimize import NonlinearConstraint, minimize
+from paths import paths_1
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,8 @@ class KnightsMoves:
         """
         x, y = curr
 
-        possible_moves = [(x - 2, y - 1),
+        possible_moves = [
+        (x - 2, y - 1),
         (x - 2, y + 1),
         (x + 2, y - 1),
         (x + 2, y + 1),
@@ -54,7 +56,7 @@ class KnightsMoves:
 
         return result
 
-    def find_paths(self, start: tuple[int, int], end: tuple[int, int], max_len: int = 8):
+    def find_paths(self, start: tuple[int, int], end: tuple[int, int], paths, min_len: int=5, max_len: int = 8):
         """
         Finds all possible paths between start and end using only knights moves.
         """
@@ -63,10 +65,10 @@ class KnightsMoves:
         visited = np.zeros((self.n, self.n)) 
 
         logger.debug(f"Visited {start}")
-        visited[start[0]][start[1]] = True
+        visited[start[1]][start[0]] = True
         q.append([start])
 
-        paths: list[list[tuple[int, int]]] = []
+        paths: list[list[tuple[int, int]]] = paths or []
         while q:
             logger.debug("start iteration")
             path = q.popleft()
@@ -76,7 +78,7 @@ class KnightsMoves:
 
             curr = path[-1]
 
-            if curr == end:
+            if curr == end and len(path) > min_len:
                 logger.info("Reached the end.")
                 paths.append(path)
             
@@ -130,7 +132,7 @@ class KnightsMoves:
         current_letter = "A"
         for next in path:
             logger.debug(f"next {next}")
-            next_letter = board[next[0]][next[1]]
+            next_letter = board[next[1]][next[0]]
 
             logger.debug(f"{curr} {current_letter} -> {next} {m[next_letter]}")
             if next_letter != current_letter:
@@ -201,24 +203,30 @@ if __name__ == "__main__":
     n=6
 
     k =KnightsMoves(b=board)
-
-    paths = k.find_paths(start=(0,0), end=(5, 5))
     
-    with open("paths.txt", "w") as f:
-        for path in paths:
-            f.writelines(f"{path}\n")
+    try:
+        paths = k.find_paths(start=(0,0), end=(5, 5), min_len=8, max_len=15, paths=paths_1)
+    except KeyboardInterrupt:
+        logger.warning("interrupted")
+    
+    with open("paths.py", "w") as f:
+        f.writelines("paths_1 =[")
+        for path in paths_1:
+            f.writelines(f"{path},\n")
+        f.writelines("]")
 
 
     """
     We need to also find the paths from (0,6) to (6,0), but the thing is all of our solutions are valid from any corner to the corner across.
     So all we need to do is rotate (or just reflect in y = 3) each path and then we have a valid solution for (0,6) and (6,0)
     """
-    alt_paths = [(k.flip_path(path)) for path in paths]
+    alt_paths = [(k.flip_path(path)) for path in paths_1]
 
-    with open("alt_paths.txt", "w") as f:
+    with open("alt_paths.py", "w") as f:
+        f.writelines("paths_1 =[")
         for path in alt_paths:
-            f.writelines(f"{path}\n")
-
+            f.writelines(f"{path},\n")
+        f.writelines("]")
 
     """
     Need to calculate the formulas for the scores
