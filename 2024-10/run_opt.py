@@ -14,3 +14,5 @@ score = KnightsMoves(b=board).calculate_score(path=[
 logging.debug(f"Score function {score}")
     
 print(run_optimization(score, score))
+
+"""Cant use this because it doesnt allow to restrict to only integer solutions"""

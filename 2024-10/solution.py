@@ -49,7 +49,7 @@ class KnightsMoves:
         (x + 1, y + 2)]
 
         
-        result = [ point for point in possible_moves if point[0] >= 0 and point[0] <= self.n and point[1] >= 0 and point[1] <= self.n
+        result = [ point for point in possible_moves if point[0] >= 0 and point[0] < self.n and point[1] >= 0 and point[1] < self.n
                   ] 
 
         return result
@@ -115,7 +115,7 @@ class KnightsMoves:
         """
         Given a path, calculate the score
         """
-        curr = path.pop(0)
+        curr = path[0]
 
         a, b, c = symbols("a b c")
 
@@ -129,6 +129,7 @@ class KnightsMoves:
         
         current_letter = "A"
         for next in path:
+            logger.debug(f"next {next}")
             next_letter = board[next[0]][next[1]]
 
             logger.debug(f"{curr} {current_letter} -> {next} {m[next_letter]}")
@@ -142,13 +143,13 @@ class KnightsMoves:
             current_letter = next_letter
         
 
-        print(score)
+        logger.debug(score)
         return lambdify([a,b,c], score)
             
 
             
     def flip_path(self, path: list[tuple[int, int]]) -> list[tuple[int, int]]:
-        return [(x, self.n - y) for x, y in path]       
+        return [(x, self.n - 1 - y) for x, y in path]       
         
 
 def run_optimization(f, g):
@@ -201,7 +202,7 @@ if __name__ == "__main__":
 
     k =KnightsMoves(b=board)
 
-    paths = k.find_paths(start=(0,0), end=(6, 6))
+    paths = k.find_paths(start=(0,0), end=(5, 5))
     
     with open("paths.txt", "w") as f:
         for path in paths:
