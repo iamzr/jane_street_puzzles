@@ -1,4 +1,3 @@
-
 import itertools
 import logging
 
@@ -11,9 +10,6 @@ from alt_paths import paths_2
 logging.basicConfig(level=logging.DEBUG)
 
 k = KnightsMoves(b=board)
-
-# paths_1.reverse()
-# paths_2.reverse()
 
 paths_1 = paths_1
 paths_2 = paths_2
