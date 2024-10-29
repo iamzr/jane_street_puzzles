@@ -1,6 +1,4 @@
 import collections
-from email.policy import default
-import itertools
 import logging
 from typing import NamedTuple, Optional
 import numpy as np
@@ -218,16 +216,24 @@ class KnightsMoves:
 
     def get_unique_scores(self, paths: list[list[Point]]) -> dict:
         scores: dict = collections.defaultdict(list)
+        paths_dict: dict = collections.defaultdict(list)
 
         for path in paths:
-            score = self._calculate_score(path)
-            key = score
+            paths_dict[len(path)].append(path)
 
-            for existing_score in scores:
-                if simplify(existing_score - score) == 0:
-                    key = existing_score
-                    break
+        for paths in paths_dict.values():
+            s: dict = collections.defaultdict(list)
+            for path in paths:
+                score = self._calculate_score(path)
+                key = score
 
-            scores[key].append(path)
+                for existing_score in scores:
+                    if simplify(existing_score - score) == 0:
+                        key = existing_score
+                        break
+
+                s[key].append(path)
+
+            scores.update(s)
 
         return scores

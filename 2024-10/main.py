@@ -1,11 +1,8 @@
-from collections import defaultdict
-from email.policy import default
 import itertools
 import logging
 from pathlib import Path
 
-from sympy import simplify
-from solution import Board, KnightsMoves, Point
+from solution import KnightsMoves, Point
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
