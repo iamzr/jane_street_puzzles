@@ -1,29 +1,65 @@
 import collections
+from email.policy import default
+import itertools
 import logging
+from typing import NamedTuple, Optional
 import numpy as np
-from sympy import lambdify, symbols
-from scipy.optimize import NonlinearConstraint, minimize
-from paths import paths_1
+from sympy import lambdify, simplify, symbols
 
 logger = logging.getLogger(__name__)
 
-board = [
-    ["A", "B", "B", "C", "C", "C"],
-    ["A", "B", "B", "C", "C", "C"],
-    ["A", "A", "B", "B", "C", "C"],
-    ["A", "A", "B", "B", "C", "C"],
-    ["A", "A", "A", "B", "B", "C"],
-    ["A", "A", "A", "B", "B", "C"],
-]
+
+class Point(NamedTuple):
+    x: int
+    y: int
+
+    def __repr__(self) -> str:
+        return f"({self.x}, {self.y})"
+
+    def __str__(self) -> str:
+        _indicies_map = {
+            0: "a",
+            1: "b",
+            2: "c",
+            3: "d",
+            4: "e",
+            5: "f",
+        }
+
+        x = _indicies_map[self.x]
+        y = self.y + 1
+
+        return f"{x}{y}"
+
+
+class Board:
+    def __init__(self, b: list[list[str]]) -> None:
+        self.b = b
+        self.l = len(self.b)
+
+    def get(self, p: Point):
+        return self.b[p.y][p.x]
+
+    def __len__(self):
+        return self.l
 
 
 class KnightsMoves:
-    def __init__(self, b):
-        self.b = b
+    def __init__(self):
+        board = [
+            ["A", "A", "A", "B", "B", "C"],
+            ["A", "A", "A", "B", "B", "C"],
+            ["A", "A", "B", "B", "C", "C"],
+            ["A", "A", "B", "B", "C", "C"],
+            ["A", "B", "B", "C", "C", "C"],
+            ["A", "B", "B", "C", "C", "C"],
+        ]
 
+        b = Board(b=board)
+        self.b = b
         self.n = len(b)
 
-    def possible_moves(self, curr: tuple[int, int]) -> list[tuple[int, int]]:
+    def possible_moves(self, curr: Point) -> list[Point]:
         """
         For a given position b[x][y] you can do the following moves:
 
@@ -41,47 +77,49 @@ class KnightsMoves:
         x, y = curr
 
         possible_moves = [
-            (x - 2, y - 1),
-            (x - 2, y + 1),
-            (x + 2, y - 1),
-            (x + 2, y + 1),
-            (x - 1, y - 2),
-            (x - 1, y + 2),
-            (x + 1, y - 2),
-            (x + 1, y + 2),
+            Point(x - 2, y - 1),
+            Point(x - 2, y + 1),
+            Point(x + 2, y - 1),
+            Point(x + 2, y + 1),
+            Point(x - 1, y - 2),
+            Point(x - 1, y + 2),
+            Point(x + 1, y - 2),
+            Point(x + 1, y + 2),
         ]
 
         result = [
             point
             for point in possible_moves
-            if point[0] >= 0
-            and point[0] < self.n
-            and point[1] >= 0
-            and point[1] < self.n
+            if point.x >= 0 and point.x < self.n and point.y >= 0 and point.y < self.n
         ]
 
         return result
 
     def find_paths(
         self,
-        start: tuple[int, int],
-        end: tuple[int, int],
-        paths,
+        start: Point,
+        end: Point,
+        paths: Optional[list[list[Point]]] = None,
+        visited=None,
         min_len: int = 5,
         max_len: int = 8,
-    ):
+    ) -> list[list[Point]]:
         """
         Finds all possible paths between start and end using only knights moves.
         """
-        q: collections.deque[list[tuple[int, int]]] = collections.deque()
+        q: collections.deque[list[Point]] = collections.deque()
 
-        visited = np.zeros((self.n, self.n))
+        if visited is None:
+            visited = np.zeros((self.n, self.n))
 
-        logger.debug(f"Visited {start}")
-        visited[start[1]][start[0]] = True
-        q.append([start])
+            logger.debug(f"Visited {start}")
+            visited[start.x][start.y] = True
 
-        paths: list[list[tuple[int, int]]] = paths or []
+            q.append([start])
+
+        if paths is None:
+            paths = []
+
         while q:
             logger.debug("start iteration")
             path = q.popleft()
@@ -92,7 +130,7 @@ class KnightsMoves:
             curr = path[-1]
 
             if curr == end and len(path) > min_len:
-                logger.info("Reached the end.")
+                logger.debug("Reached the end.")
                 paths.append(path)
 
             possible_moves = self.possible_moves(curr)
@@ -113,9 +151,6 @@ class KnightsMoves:
 
                     logger.debug(f"{next} not visited")
 
-                    # if next != end:
-                    #     visited[next[0]][next[1]] = True
-
                     new_path = list(path)
                     new_path.append(next)
 
@@ -127,7 +162,7 @@ class KnightsMoves:
         logger.debug(f"visited:\n{visited}")
         return paths
 
-    def _calculate_score(self, path: list[tuple[int, int]]):
+    def _calculate_score(self, path: list[Point]):
         """
         Given a path, calculate the score
         """
@@ -135,14 +170,14 @@ class KnightsMoves:
 
         a, b, c = symbols("a b c")
 
-        score = a
+        score = 0
 
         m = {"A": a, "B": b, "C": c}
 
         current_letter = "A"
         for next in path:
             logger.debug(f"next {next}")
-            next_letter = board[next[1]][next[0]]
+            next_letter = self.b.get(next)
 
             logger.debug(f"{curr} {current_letter} -> {next} {m[next_letter]}")
             if next_letter != current_letter:
@@ -157,49 +192,42 @@ class KnightsMoves:
         logger.debug(score)
         return score
 
-    def calculate_score(self, path: list[tuple[int, int]]):
+    def calculate_score(self, path: list[Point]):
         score = self._calculate_score(path=path)
         a, b, c = symbols("a b c")
         return lambdify([a, b, c], score)
 
-    def flip_path(self, path: list[tuple[int, int]]) -> list[tuple[int, int]]:
-        return [(x, self.n - 1 - y) for x, y in path]
+    def lambdify_score(self, score):
+        a, b, c = symbols("a b c")
+        return lambdify([a, b, c], score)
 
+    def flip_path(self, path: list[Point]) -> list[Point]:
+        return [Point(x, self.n - 1 - y) for x, y in path]
 
-if __name__ == "__main__":
-    # logging.basicConfig(level=logging.DEBUG)
-    """
-    First we start with calculating the different paths between the start and end.
-    """
-    n = 6
+    def _convert_path_to_output_format(self, path: list[Point]) -> list[str]:
+        return [str(point) for point in path]
 
-    k = KnightsMoves(b=board)
+    def solution_str(
+        self, a: int, b: int, c: int, path_1: list[Point], path_2: list[Point]
+    ) -> str:
+        s = [str(a), str(b), str(c)]
+        s.extend(self._convert_path_to_output_format(path=path_1))
+        s.extend(self._convert_path_to_output_format(path=path_2))
 
-    try:
-        paths = k.find_paths(
-            start=(0, 0), end=(5, 5), min_len=8, max_len=15, paths=paths_1
-        )
-    except KeyboardInterrupt:
-        logger.warning("interrupted")
+        return ",".join(s)
 
-    with open("paths.py", "w") as f:
-        f.writelines("paths_1 =[")
-        for path in paths_1:
-            f.writelines(f"{path},\n")
-        f.writelines("]")
+    def get_unique_scores(self, paths: list[list[Point]]) -> dict:
+        scores: dict = collections.defaultdict(list)
 
-    """
-    We need to also find the paths from (0,6) to (6,0), but the thing is all of our solutions are valid from any corner to the corner across.
-    So all we need to do is rotate (or just reflect in y = 3) each path and then we have a valid solution for (0,6) and (6,0)
-    """
-    alt_paths = [(k.flip_path(path)) for path in paths_1]
+        for path in paths:
+            score = self._calculate_score(path)
+            key = score
 
-    with open("alt_paths.py", "w") as f:
-        f.writelines("paths_1 =[")
-        for path in alt_paths:
-            f.writelines(f"{path},\n")
-        f.writelines("]")
+            for existing_score in scores:
+                if simplify(existing_score - score) == 0:
+                    key = existing_score
+                    break
 
-    """
-    Need to calculate the formulas for the scores
-    """
+            scores[key].append(path)
+
+        return scores
