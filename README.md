@@ -1,4 +1,4 @@
-# Jane Street Monthly Puzzles
+# Jane Street's Monthly Puzzles
 
 Welcome to my repository for solving the [Jane Street Monthly Puzzles](https://www.janestreet.com/puzzles/)!
 
