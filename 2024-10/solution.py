@@ -1,6 +1,6 @@
 import itertools
 import logging
-from typing import NamedTuple, Self
+from typing import NamedTuple
 
 from sympy import lambdify, symbols
 

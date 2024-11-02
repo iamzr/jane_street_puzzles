@@ -1,4 +1,3 @@
-import numpy as np
 from sympy import simplify, symbols
 from solution import Point
 from solution import KnightsMoves
