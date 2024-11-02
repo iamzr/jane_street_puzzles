@@ -114,3 +114,94 @@ path_2s: [['a6', 'b4', 'd3', 'f4', 'd5', 'e3', 'f1']]
 
 solution_string 5,25,8,a1,c2,d4,f5,d6,e4,f6,a6,b4,d3,f4,d5,e3,f1
             
+
+
+            found solution
+For a=1, b=5, c=4 where
+# 
+path_1s: ['a1', 'c2', 'a3', 'b1', 'd2', 'c4', 'e3', 'd1', 'c3', 'e4', 'f6']
+# 
+path_2s: ['a6', 'c5', 'a4', 'c3', 'e4', 'd2', 'c4', 'e3', 'f1']
+# 
+solution_string 1,5,4,a1,c2,a3,b1,d2,c4,e3,d1,c3,e4,f6,a6,c5,a4,c3,e4,d2,c4,e3,f1
+            
+found solution
+For a=5, b=5, c=2 where
+# 
+path_1s: ['a1', 'c2', 'a3', 'b1', 'd2', 'f1', 'e3', 'c4', 'd6', 'e4', 'f6']
+# 
+path_2s: ['a6', 'b4', 'a2', 'c1', 'e2', 'f4', 'e6', 'd4', 'f5', 'e3', 'f1']
+# 
+solution_string 5,5,2,a1,c2,a3,b1,d2,f1,e3,c4,d6,e4,f6,a6,b4,a2,c1,e2,f4,e6,d4,f5,e3,f1
+            
+found solution
+For a=5, b=2, c=2 where
+# 
+path_1s: ['a1', 'b3', 'd2', 'b1', 'c3', 'a2', 'b4', 'c2', 'e3', 'd5', 'f6']
+# 
+path_2s: ['a6', 'c5', 'a4', 'c3', 'b1', 'a3', 'c4', 'd2', 'f1']
+# 
+solution_string 5,2,2,a1,b3,d2,b1,c3,a2,b4,c2,e3,d5,f6,a6,c5,a4,c3,b1,a3,c4,d2,f1
+            
+found solution
+For a=4, b=3, c=4 where
+# 
+path_1s: ['a1', 'c2', 'a3', 'b5', 'd4', 'c6', 'a5', 'c4', 'e3', 'd5', 'f6']
+# 
+path_2s: ['a6', 'b4', 'c2', 'e1', 'd3', 'c5', 'a4', 'c3', 'd5', 'e3', 'f1']
+# 
+solution_string 4,3,4,a1,c2,a3,b5,d4,c6,a5,c4,e3,d5,f6,a6,b4,c2,e1,d3,c5,a4,c3,d5,e3,f1
+            
+found solution
+For a=5, b=5, c=4 where
+# 
+path_1s: ['a1', 'c2', 'a3', 'b1', 'c3', 'a2', 'b4', 'd5', 'f6']
+# 
+path_2s: ['a6', 'c5', 'e6', 'd4', 'f5', 'd6', 'e4', 'f6', 'd5', 'e3', 'f1']
+# 
+solution_string 5,5,4,a1,c2,a3,b1,c3,a2,b4,d5,f6,a6,c5,e6,d4,f5,d6,e4,f6,d5,e3,f1
+            
+found solution
+For a=2, b=5, c=4 where
+# 
+path_1s: ['a1', 'c2', 'e1', 'd3', 'f2', 'd1', 'c3', 'e4', 'f6']
+# 
+path_2s: ['a6', 'b4', 'd3', 'c5', 'e4', 'c3', 'd1', 'e3', 'f1']
+# 
+solution_string 2,5,4,a1,c2,e1,d3,f2,d1,c3,e4,f6,a6,b4,d3,c5,e4,c3,d1,e3,f1
+            
+found solution
+For a=5, b=1, c=4 where
+# 
+path_1s: ['a1', 'c2', 'a3', 'b1', 'd2', 'b3', 'd4', 'c6', 'b4', 'd5', 'f6']
+# 
+path_2s: ['a6', 'c5', 'a4', 'c3', 'e4', 'd2', 'b3', 'a5', 'c4', 'e3', 'f1']
+# 
+solution_string 5,1,4,a1,c2,a3,b1,d2,b3,d4,c6,b4,d5,f6,a6,c5,a4,c3,e4,d2,b3,a5,c4,e3,f1
+            
+found solution
+For a=2, b=3, c=4 where
+# 
+path_1s: ['a1', 'c2', 'a3', 'c4', 'b6', 'd5', 'b4', 'd3', 'f2', 'e4', 'f6']
+# 
+path_2s: ['a6', 'c5', 'a4', 'b6', 'c4', 'd2', 'f3', 'd4', 'f5', 'e3', 'f1']
+# 
+solution_string 2,3,4,a1,c2,a3,c4,b6,d5,b4,d3,f2,e4,f6,a6,c5,a4,b6,c4,d2,f3,d4,f5,e3,f1
+            
+found solution
+For a=3, b=2, c=4 where
+# 
+path_1s: ['a1', 'c2', 'e1', 'd3', 'b2', 'c4', 'a3', 'b5', 'd6', 'e4', 'f6']
+# 
+path_2s: ['a6', 'b4', 'd3', 'c5', 'b3', 'd2', 'b1', 'c3', 'd5', 'e3', 'f1']
+# 
+solution_string 3,2,4,a1,c2,e1,d3,b2,c4,a3,b5,d6,e4,f6,a6,b4,d3,c5,b3,d2,b1,c3,d5,e3,f1
+            
+found solution
+For a=1, b=5, c=2 where
+# 
+path_1s: ['a1', 'c2', 'e1', 'f3', 'd2', 'f1', 'e3', 'c4', 'd6', 'e4', 'f6']
+# 
+path_2s: ['a6', 'c5', 'd3', 'e5', 'c4', 'd6', 'e4', 'c3', 'd5', 'e3', 'f1']
+# 
+solution_string 1,5,2,a1,c2,e1,f3,d2,f1,e3,c4,d6,e4,f6,a6,c5,d3,e5,c4,d6,e4,c3,d5,e3,f1
