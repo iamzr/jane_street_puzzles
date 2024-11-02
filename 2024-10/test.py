@@ -1,17 +1,58 @@
 import datetime
 import itertools
 import logging
-from solution import KnightsMoves, Point
+from pathlib import Path
+import pprint
+from typing import NamedTuple
 
-k = KnightsMoves()
+import numpy as np
+from sympy import lambdify, symbols
+
+pp = pprint.PrettyPrinter(indent=2, sort_dicts=False)
+
+logs_dir = Path(__name__).parent / "logs"
+logs_dir.mkdir(parents=True, exist_ok=True)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO,
-    filename=f"logfile {datetime.datetime.now()}",
+    filename=logs_dir / f"{datetime.datetime.now()}.log",
     filemode="a+",
     format="%(asctime)-15s %(levelname)-8s %(message)s",
 )
+
+
+class Point(NamedTuple):
+    x: int
+    y: int
+
+    def __repr__(self) -> str:
+        return f"({self.x}, {self.y})"
+
+    def __str__(self) -> str:
+        _indicies_map = {
+            0: "a",
+            1: "b",
+            2: "c",
+            3: "d",
+            4: "e",
+            5: "f",
+        }
+
+        x = _indicies_map[self.x]
+        y = self.y + 1
+
+        return f"{x}{y}"
+
+
+board = [
+    ["A", "A", "A", "B", "B", "C"],
+    ["A", "A", "A", "B", "B", "C"],
+    ["A", "A", "B", "B", "C", "C"],
+    ["A", "A", "B", "B", "C", "C"],
+    ["A", "B", "B", "C", "C", "C"],
+    ["A", "B", "B", "C", "C", "C"],
+]
 
 
 class TreeNode:
@@ -50,60 +91,49 @@ def get_neighbors(point):
     return result
 
 
-# def find_paths(start, end, board, min_length, max_length, visited=None, depth=0):
-#     """
-#     Recursively find all paths from start to end within a max length and return as a tree.
-
-#     Parameters:
-#     - start: The starting point (tuple).
-#     - end: The ending point (tuple).
-#     - board: The 2D board array.
-#     - max_length: Maximum allowed path length.
-#     - visited: Set of visited points for the current path.
-#     - depth: Current depth of recursion.
-
-#     Returns:
-#     - TreeNode representing the root of the tree structure with all paths.
-#     """
-#     if visited is None:
-#         visited = set()
-#     visited.add(start)
-
-#     # Create a tree node for the current start point
-#     root = TreeNode(start)
-
-#     # If the start is the end, or if we've reached the max depth, return the node
-#     if start == end and depth >= min_length:
-#         print("hit end")
-#         return root
-#     if depth >= max_length:
-#         # print("hit depth")
-#         return None
-
-#     # Explore each neighbor that hasn't been visited
-#     for neighbor in get_neighbors(start):
-#         if neighbor not in visited:
-#             child_node = find_paths(
-#                 neighbor, end, board, min_length, max_length, visited.copy(), depth + 1
-#             )
-#             if child_node:
-#                 root.add_child(child_node)
-
-#     return root
-
-
 scores_1 = {}
 scores_2 = {}
 
 
+def calculate_score(path: list[Point]):
+    """
+    Given a path, calculate the score
+    """
+    curr = path[0]
+
+    a, b, c = symbols("a b c")
+
+    score = 0
+
+    m = {"A": a, "B": b, "C": c}
+
+    current_letter = "A"
+    for next in path:
+        logger.debug(f"next {next}")
+        next_letter = board[next.y][next.x]
+
+        logger.debug(f"{curr} {current_letter} -> {next} {m[next_letter]}")
+        if next_letter != current_letter:
+            logger.debug(f"multiply by {m[next_letter]}")
+            score *= m[next_letter]
+        else:
+            logger.debug(f"add {m[next_letter]}")
+            score += m[next_letter]
+
+        current_letter = next_letter
+
+    logger.debug(score)
+    return score
+
+
 def handle_path(path):
     path = [Point(x, y) for x, y, in path]
-    score = k._calculate_score(path=path)
+    score = calculate_score(path=path)
     if score not in scores_1:
         scores_1[score] = path
 
     alt_path = [Point(x, 6 - 1 - y) for x, y in path]
-    score = k._calculate_score(path=alt_path)
+    score = calculate_score(path=alt_path)
     if score not in scores_2:
         scores_2[score] = alt_path
 
@@ -170,51 +200,24 @@ def find_paths(
     return all_paths
 
 
-def dfs_collect_paths(node, end, current_path=None, all_paths=None):
-    """
-    Depth-First Search to collect all unique paths from start to end.
-
-    Parameters:
-    - node: The current TreeNode being visited.
-    - end: The endpoint to stop path collection.
-    - current_path: The path being built as a list of points.
-    - all_paths: List to store all complete paths from start to end.
-
-    Returns:
-    - List of all paths from the start node to the end node.
-    """
-    if current_path is None:
-        current_path = []
-    if all_paths is None:
-        all_paths = []
-
-    # Add the current node's point to the path
-    current_path.append(node.point)
-
-    # If we've reached the end point, add the path to all_paths
-    if node.point == end:
-        all_paths.append(current_path.copy())
-        handle_path(current_path)
-    else:
-        # Continue DFS on each child
-        for child in node.children:
-            dfs_collect_paths(child, end, current_path, all_paths)
-
-    # Backtrack to explore other paths
-    current_path.pop()
-
-    return all_paths
+def _convert_path_to_output_format(path: list[Point]) -> list[str]:
+    return [str(point) for point in path]
 
 
-# Usage example
-board = [
-    ["A", "A", "A", "B", "B", "C"],
-    ["A", "A", "A", "B", "B", "C"],
-    ["A", "A", "B", "B", "C", "C"],
-    ["A", "A", "B", "B", "C", "C"],
-    ["A", "B", "B", "C", "C", "C"],
-    ["A", "B", "B", "C", "C", "C"],
-]
+def solution_str(
+    a: int, b: int, c: int, path_1: list[Point], path_2: list[Point]
+) -> str:
+    s = [str(a), str(b), str(c)]
+    s.extend(_convert_path_to_output_format(path=path_1))
+    s.extend(_convert_path_to_output_format(path=path_2))
+
+    return ",".join(s)
+
+
+def lambdify_score(score):
+    a, b, c = symbols("a b c")
+    return lambdify([a, b, c], score)
+
 
 # Define start and end points
 start_point = (0, 0)
@@ -227,26 +230,26 @@ max_path_length = 7  # Maximum path length
 # tree_root = find_paths(start_point, end_point, board, min_path_length, max_path_length)
 all_paths = find_paths(start_point, end_point, board, max_path_length)
 
-# Printing the root node to see the structure
-# print(tree_root)
-
-# Use DFS to collect all paths
-# all_paths = dfs_collect_paths(tree_root, end_point)
-
-logger.info(f"{scores_1=}")
-logger.info(f"{scores_2=}")
-
-# # Print all paths
-# for path in all_paths:
-#     print(path)
+logger.info(
+    f"""Score functions for paths from (0,0) to (5,5):
+    
+{pp.pformat(scores_1)}
+"""
+)
+logger.info(
+    f"""Score functions for paths from (0,5) to (5, 0):
+    
+{pp.pformat(scores_2)}
+"""
+)
 
 
 def check_scores(scores: dict):
     result = {}
     for score in scores:
-        score_func = k.lambdify_score(score=score)
+        score_func = lambdify_score(score=score)
 
-        for a, b, c in itertools.product(range(1, 6), range(1, 6), range(1, 6)):
+        for a, b, c in itertools.product(range(1, 50), range(1, 50), range(1, 50)):
             s = score_func(a, b, c)
 
             if s == 2024 and result.get((a, b, c)) is None:
@@ -260,48 +263,24 @@ results_2 = check_scores(scores_2)
 
 solutions = results_1.keys() & results_2.keys()
 
+optimal = (np.inf, np.inf, np.inf, "")
 for solution in solutions:
     a, b, c = solution
-    output = f"""found solution
+    solution_string = solution_str(
+        a=a, b=b, c=c, path_1=results_1[solution], path_2=results_2[solution]
+    )
+    output = f"""Solution:
 For {a=}, {b=}, {c=} where
-# 
-path_1s: {k._convert_path_to_output_format(results_1[solution])}
-# 
-path_2s: {k._convert_path_to_output_format(results_2[solution])}
-# 
-solution_string {k.solution_str(a=a, b=b, c=c, path_1=results_1[solution], path_2=results_2[solution])}
-            """
+
+path_1s: {_convert_path_to_output_format(results_1[solution])}
+
+path_2s: {_convert_path_to_output_format(results_2[solution])}
+"""
 
     print(output)
-    logger.info(output)
+    logger.debug(output)
 
-print("end")
+    if a + b + c < optimal[0] + optimal[1] + optimal[2]:
+        optimal = (a, b, c, solution_string)
 
-
-# # logger.info("Run optimization")
-# for score_1, score_2 in itertools.product(scores_1, scores_2):
-#     score_func_1 = k.lambdify_score(score_1)
-#     score_func_2 = k.lambdify_score(score_2)
-
-#     for a, b, c in itertools.product(range(1, 6), range(1, 6), range(1, 6)):
-#         s_1 = score_func_1(a, b, c)
-#         s_2 = score_func_2(a, b, c)
-#         if s_1 == 2024 and s_2 == 2024 and (a + b + c) <= 50:
-#             print(a, b, c)
-#             print(
-#                 f"""found solution
-# For {a=}, {b=}, {c=} where
-
-# score_1: {score_1}
-
-# score_2: {score_2}
-
-# path_1s: {k._convert_path_to_output_format(scores_1[score_1])}
-
-# path_2s: {k._convert_path_to_output_format(scores_2[score_2])}
-
-# solution_string {k.solution_str(a=a, b=b, c=c, path_1=scores_1[score_1], path_2=scores_2[score_2])}
-#             """
-#             )
-
-#             break
+logger.info(f"Optimal solution: {optimal[3]}")
