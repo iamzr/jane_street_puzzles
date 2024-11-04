@@ -1,5 +1,19 @@
+import datetime
+import logging
 from multiprocessing import Value
+from pathlib import Path
 import random
+
+logs_dir = Path(__name__).parent / "logs"
+logs_dir.mkdir(parents=True, exist_ok=True)
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename=logs_dir / f"{datetime.datetime.now()}.log",
+    filemode="a+",
+    format="%(asctime)-15s %(levelname)-8s %(message)s",
+)
 
 
 class Point:
@@ -143,13 +157,25 @@ if __name__ == "__main__":
     # print(f"closest_side: {p5}, {p6}")
 
     # print(doIntersect(p3, p4, p5, p6))
-    n = 100_000_000_000
+    n = 10_000_000_000
+    next_magnitude = 10
 
-    results = []
-    for i in range(n):
+    i = 0
+    results = 0
+    while i <= n:
         red = Point(x=random.random(), y=random.random())
         blue = Point(x=random.random(), y=random.random())
 
-        results.append(has_solution(blue=blue, red=red))
+        results += has_solution(blue=blue, red=red)
+        i += 1
 
-    print(sum(results) / n)
+        if i == next_magnitude:
+            # Calculate the answer and store in outputs
+            ans = results / i
+            logger.info(f"At iteration {i}: Answer = {ans}")
+
+            # Update next magnitude to the next power of 10
+            next_magnitude *= 10
+
+    ans = results / n
+    logger.info(ans)
