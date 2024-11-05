@@ -1,6 +1,7 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
 import logging
-from multiprocessing import Value
+from multiprocessing import Manager, Pool, Value
 from pathlib import Path
 import random
 
@@ -17,6 +18,8 @@ logging.basicConfig(
 
 
 class Point:
+    __slots__ = ["x", "y"]
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -143,23 +146,7 @@ def has_solution(blue: Point, red: Point):
     return doIntersect(p3, p4, p5, p6)
 
 
-if __name__ == "__main__":
-    # # p1 = Point(0.3, 0.3)
-    # # p2 = Point(0.2, 0.5)
-
-    # p1 = Point(0.3, 0.3)
-    # p2 = Point(0.2, 0.31)
-
-    # p3, p4 = find_points_on_perpendicular_bisector(p1, p2)
-
-    # # closest side
-    # p5, p6 = get_closest_side(p1)
-    # print(f"closest_side: {p5}, {p6}")
-
-    # print(doIntersect(p3, p4, p5, p6))
-    n = 10_000_000_000
-    next_magnitude = 10
-
+def worker_task(n):
     i = 0
     results = 0
     while i <= n:
@@ -169,13 +156,60 @@ if __name__ == "__main__":
         results += has_solution(blue=blue, red=red)
         i += 1
 
-        if i == next_magnitude:
-            # Calculate the answer and store in outputs
-            ans = results / i
-            logger.info(f"At iteration {i}: Answer = {ans}")
+    return results
 
-            # Update next magnitude to the next power of 10
-            next_magnitude *= 10
 
-    ans = results / n
-    logger.info(ans)
+def main_multithreaded(n, num_threads=5):
+    total_results = 0
+
+    # Use ThreadPoolExecutor for multithreading
+    with ThreadPoolExecutor(max_workers=num_threads) as executor:
+        trials_per_thread = n // num_threads
+        trials = trials_per_thread * num_threads
+
+        # Create a list of futures for each chunk
+        futures = [
+            executor.submit(worker_task, trials_per_thread) for i in range(num_threads)
+        ]
+
+        # Collect results as they complete
+        for future in as_completed(futures):
+            total_results += future.result()
+
+    ans = total_results / trials
+    logging.info(f"Final answer after {trials} iterations: {ans}")
+
+
+def main_multiprocessing(n, num_processes=10):
+    logger.info(f"Starting main with {num_processes=}")
+    # Set up multiprocessing pool
+    with Pool(processes=num_processes) as pool:
+        trials_per_process = n // num_processes
+        logger.debug(f"{trials_per_process=}")
+        trials = trials_per_process * num_processes
+
+        # Define the tasks for each chunk
+        tasks = [[trials_per_process]] * num_processes
+
+        # Run worker tasks in parallel
+        results = pool.starmap(worker_task, tasks)
+
+        # # close the thread pool
+        pool.close()
+        # wait for issued tasks to complete
+        pool.join()
+
+        total_results = 0
+        for result in results:
+            logger.debug(f"Result: {result}")
+            total_results += result
+
+        logger.debug(f"Sum of results: {total_results}")
+        logger.debug(f"Trials: {trials}")
+        ans = total_results / trials
+        logger.info(f"Final Answer after {n} iterations: {ans}")
+
+
+if __name__ == "__main__":
+    logger.info("start")
+    main_multiprocessing(n=1_000_000_000, num_processes=10)
