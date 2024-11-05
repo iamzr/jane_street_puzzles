@@ -1,8 +1,9 @@
 use std::thread;
 use std::sync::mpsc;
+use std::env;
 use rand::Rng;
 use rs::{has_solution, Point};
-use log::{info};
+use log::{info, debug};
 use log::LevelFilter;
 use log4rs::append::file::FileAppender;
 use log4rs::encode::pattern::PatternEncoder;
@@ -25,8 +26,19 @@ fn main() {
 
     log::info!("Start");
 
+    let args: Vec<String> = env::args().collect();
+    debug!("{:?}", args);
+
     // start
-    let n: i64 = 100_000_000_000;
+    let n: i64 = match args[1].parse::<i64>() {
+        Ok(n) => n,
+        Err(_e) => {
+            eprintln!("Error {}", _e);
+            panic!("Invalid input for n provided")
+
+        },
+    };
+
     let threads = 10;
 
     let iterations_per_thread = n / threads;
