@@ -3,7 +3,7 @@ use std::sync::mpsc;
 use std::env;
 use rand::Rng;
 use rs::{has_solution, Point};
-use log::{info, debug};
+use log::{debug, info, trace};
 use log::LevelFilter;
 use log4rs::append::file::FileAppender;
 use log4rs::encode::pattern::PatternEncoder;
@@ -64,7 +64,7 @@ fn main() {
     }
 
     // Collect the results and calculate the sum.
-    let results: i64 = rx.iter().take(10).sum();
+    let results: i64 = rx.iter().take(threads as usize).sum();
 
     info!("Results {}", results);
     info!("Trials {}", iterations);
@@ -81,18 +81,21 @@ fn task(n: &i64) -> i64 {
     let mut results = 0; 
     for _ in 1..*n {
         let red = Point {
-            x: rng.gen::<f64>(),
-            y: rng.gen::<f64>()
+            x: rng.gen_range(0.0..=1.0),
+            y: rng.gen_range(0.0..=1.0)
         };
 
         let blue = Point {
-            x: rng.gen::<f64>(),
-            y: rng.gen::<f64>()
+            x: rng.gen_range(0.0..=1.0),
+            y: rng.gen_range(0.0..=1.0)
         };
+
+        trace!("{:?} {:?}", blue, red);
 
         match has_solution(&blue, &red) {
             Ok(true) => {
                 results = results + 1;
+                trace!("Solution found")
             },
             Ok(false) => (),
             Err(_e) => eprintln!("something happened {}", _e)
