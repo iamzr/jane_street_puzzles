@@ -81,13 +81,13 @@ fn task(n: &i64) -> i64 {
     let mut results = 0; 
     for _ in 1..*n {
         let red = Point {
-            x: rng.gen_range(0.0..=1.0),
-            y: rng.gen_range(0.0..=1.0)
+            x: rng.gen_range(0.0..1.0),
+            y: rng.gen_range(0.0..1.0)
         };
 
         let blue = Point {
-            x: rng.gen_range(0.0..=1.0),
-            y: rng.gen_range(0.0..=1.0)
+            x: rng.gen_range(0.0..1.0),
+            y: rng.gen_range(0.0..1.0)
         };
 
         trace!("{:?} {:?}", blue, red);

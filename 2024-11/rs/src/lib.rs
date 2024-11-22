@@ -1,5 +1,3 @@
-use std::f64::INFINITY;
-
 #[derive(Debug, PartialEq)]
 pub struct Point {
     pub x: f64,
@@ -29,19 +27,14 @@ fn get_closest_side(p: &Point) -> Result<Edges, &'static str> {
     let y = p.y;
 
     if y <= x && y < 1.0 - x {
-        // Ok((Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 0.0 }))
         Ok(Edges::Bottom)
     } else if y > x && y <= 1.0 - x {
-        // Ok((Point { x: 0.0, y: 0.0 }, Point { x: 0.0, y: 1.0 }))
         Ok(Edges::Left)
     } else if y >= x && y > 1.0 - x {
-        // Ok((Point { x: 0.0, y: 1.0 }, Point { x: 1.0, y: 1.0 }))
         Ok(Edges::Top)
     } else if y < x && y >= 1.0 - x {
-        // Ok((Point { x: 1.0, y: 0.0 }, Point { x: 1.0, y: 1.0 }))
         Ok(Edges::Right)
     } else if x == 0.5 && y == 0.5 {
-        // Ok((Point { x: 0.0, y: 0.0 }, Point { x: 1.0, y: 0.0 }))
         Ok(Edges::Bottom)
     } else {
         Err("Something's gone wrong")
@@ -62,35 +55,19 @@ pub fn has_solution(blue: &Point, red: &Point) -> Result<bool, &'static str> {
         return Err("Identical points do not define a line")
     }
 
-    let p3 = find_midpoint(blue, red);
+    let m = find_midpoint(blue, red);
     let g = -(1.0 / find_gradient(red, blue));
 
-    let c = ( g* -p3.x) + p3.y;
+    let c = ( g* -m.x) + m.y;
 
+    let check = match edge {
+        Edges::Bottom => -c / g,
+        Edges::Left=> c,
+        Edges::Top=> (1.0-c) / g,
+        Edges::Right => g + c,
+    };
 
-    match edge {
-        Edges::Bottom => {
-            let x = -c / g;
-
-            return Ok(x <=1.0 && x >=0.0);
-
-        },
-        Edges::Left=> {
-            return Ok(c <= 1.0 && c >= 0.0);
-        },
-        Edges::Top=> {
-            let x = (1.0-c) / g;
-
-            return Ok(x <=1.0 && x >=0.0);
-
-        },
-        Edges::Right => {
-            let y = g + c;
-
-            return Ok(y <=1.0 && y >=0.0);
-        },
-
-    }
+    Ok(check <= 1.0 && check >= 0.0)
 
 
 
@@ -99,8 +76,6 @@ pub fn has_solution(blue: &Point, red: &Point) -> Result<bool, &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    // Assume necessary imports, like Point, edges, etc.
-
     mod test_has_solution {
         use super::*;
 
@@ -163,6 +138,7 @@ mod tests {
 
     mod test_find_gradient {
         use super::*;
+        use std::f64::INFINITY;
 
         #[test]
         fn test_find_gradient() {
