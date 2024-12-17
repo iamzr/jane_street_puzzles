@@ -4,6 +4,8 @@ Welcome to my repository for solving the [Jane Street Monthly Puzzles](https://w
 
 Each month, Jane Street posts a new challenge that encourages creative thinking and problem-solving across math, programming, logic, and more. This repository contains my solutions, explanations, and scripts for each puzzle.
 
+If you're interested in my thought process and insights into how I solve the puzzles check out [my blog](https://ziarehman.uk/tags/jane-street-puzzles/).
+
 ## Repository Structure
 
 Each folder in this repository represents a specific month's puzzle and contains:

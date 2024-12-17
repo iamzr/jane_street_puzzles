@@ -1,4 +1,4 @@
-# Knight Moves 6 - October 2024 
+# October 2024: Knight Moves 6
 
 ## Problem
 [Link to puzzle](https://www.janestreet.com/puzzles/knight-moves-6-index/)
