@@ -1,13 +1,13 @@
 #[derive(Debug, PartialEq)]
 pub struct Point {
     pub x: f64,
-    pub y: f64
+    pub y: f64,
 }
 
 fn find_midpoint(p1: &Point, p2: &Point) -> Point {
     Point {
         x: (p1.x + p2.x) / 2.0,
-        y: (p1.y + p2.y) / 2.0
+        y: (p1.y + p2.y) / 2.0,
     }
 }
 
@@ -19,7 +19,7 @@ enum Edges {
     Top,
     Bottom,
     Left,
-    Right
+    Right,
 }
 
 fn get_closest_side(p: &Point) -> Result<Edges, &'static str> {
@@ -41,9 +41,8 @@ fn get_closest_side(p: &Point) -> Result<Edges, &'static str> {
     }
 }
 
-
 pub fn has_solution(blue: &Point, red: &Point) -> Result<bool, &'static str> {
-    let edge = match  get_closest_side(blue) {
+    let edge = match get_closest_side(blue) {
         Ok(edge) => edge,
         Err(_e) => {
             eprintln!("something went wrong {}", _e);
@@ -52,25 +51,22 @@ pub fn has_solution(blue: &Point, red: &Point) -> Result<bool, &'static str> {
     };
 
     if blue == red {
-        return Err("Identical points do not define a line")
+        return Err("Identical points do not define a line");
     }
 
     let m = find_midpoint(blue, red);
     let g = -(1.0 / find_gradient(red, blue));
 
-    let c = ( g* -m.x) + m.y;
+    let c = (g * -m.x) + m.y;
 
     let check = match edge {
         Edges::Bottom => -c / g,
-        Edges::Left=> c,
-        Edges::Top=> (1.0-c) / g,
+        Edges::Left => c,
+        Edges::Top => (1.0 - c) / g,
         Edges::Right => g + c,
     };
 
-    Ok(check <= 1.0 && check >= 0.0)
-
-
-
+    Ok((0.0..=1.0).contains(&check))
 }
 
 #[cfg(test)]
@@ -96,30 +92,38 @@ mod tests {
 
             // Mocking or ensuring the edge returned is `edges::bottom`
             let result = has_solution(&blue, &red);
-            assert_eq!(result, Ok(false));  // Adjust based on the actual logic
+            assert_eq!(result, Ok(false)); // Adjust based on the actual logic
         }
 
         #[test]
         fn test_solution_exists_top_edge() {
-            let blue = Point { x: 0.41903142181567776, y: 0.6453315775286078 };
-            let red = Point { x: 0.7049400139371284, y: 0.8198186859873597 };
-
-            let result = has_solution(&blue, &red);
-            assert_eq!(result, Ok(true)); 
-            }
-
-        #[test]
-        fn test_another_one() {
-            let blue = Point { x: 0.24847643665677582, y: 0.2975835100602469 };
-            let red = Point { x: 0.11274437235696835, y: 0.7160251321672993 };
-
+            let blue = Point {
+                x: 0.41903142181567776,
+                y: 0.6453315775286078,
+            };
+            let red = Point {
+                x: 0.7049400139371284,
+                y: 0.8198186859873597,
+            };
 
             let result = has_solution(&blue, &red);
             assert_eq!(result, Ok(true));
-
         }
 
+        #[test]
+        fn test_another_one() {
+            let blue = Point {
+                x: 0.24847643665677582,
+                y: 0.2975835100602469,
+            };
+            let red = Point {
+                x: 0.11274437235696835,
+                y: 0.7160251321672993,
+            };
 
+            let result = has_solution(&blue, &red);
+            assert_eq!(result, Ok(true));
+        }
     }
 
     mod test_find_midpoint {
@@ -133,7 +137,6 @@ mod tests {
             assert_eq!(midpoint.x, 1.0);
             assert_eq!(midpoint.y, 1.0);
         }
-
     }
 
     mod test_find_gradient {
@@ -153,6 +156,5 @@ mod tests {
             let gradient = find_gradient(&p3, &p4);
             assert_eq!(gradient, INFINITY);
         }
-
     }
 }
